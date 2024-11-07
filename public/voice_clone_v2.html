@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+<head>
+            <style></style>
+        </head>
+        <body>
+            
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Clone</title>
+    <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body Styling */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #FF7EB9, #FF65A3, #7AF9FF);
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Container Styling */
+        .container {
+            background: #FFFFFF;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            max-width: 400px;
+            width: 100%;
+            position: relative;
+        }
+
+        /* Header Styling */
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #2c2f30;
+        }
+
+        /* Dropdown Styling */
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: 2px solid #FF4081;
+            font-size: 1rem;
+            color: #333;
+        }
+
+        /* Button Styling */
+        button {
+            background-color: #FF4081;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 15px;
+            font-size: 1rem;
+            font-weight: bold;
+            width: 100%;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: background 0.3s;
+            position: relative;  /* Allows z-index to work */
+            z-index: 1;  /* Set button infront other elements */
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;   
+        }
+
+        button:hover:enabled {
+            background-color: #FF65A3;
+        }
+
+        /* Audio Player */
+        audio {
+            width: 100%;
+            margin-top: 20px;
+            outline: none;
+        }
+
+        /* Status Message */
+        #status {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #FF4081;
+        }
+
+        /* Recording Animation */
+        .recording-animation {
+            display: none;
+            position: absolute;
+            top: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 400px;
+            height: 400px;
+            z-index: 0;  /* Set animation behind other elements */
+        }
+
+        .recording-animation .circle {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 4px solid #00a7f5;
+            animation: pulse 1.5s ease-out infinite;
+            opacity: 0;
+        }
+
+        .recording-animation .circle:nth-child(1) {
+            animation-delay: 0s;
+        }
+        
+        .recording-animation .circle:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+
+        .recording-animation .circle:nth-child(3) {
+            animation-delay: 1s;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.5);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+    </style>
+
+
+    <div class="container">
+        <h1>Tasty Voice Clone</h1>
+
+        <!-- Recording Animation -->
+        <div class="recording-animation" id="recordingAnimation">
+            <div class="circle"></div>
+            <div class="circle"></div>
+            <div class="circle"></div>
+        </div>
+        
+        <!-- Dropdown for Voice Selection -->
+        <select id="voiceSelect">
+            <option value="">Select a Client</option>
+        <option value="1vqHRtpXEz3krmSd1pom">Jade</option><option value="48t7aXhrDOcByXT0Ewuz">Autumn V3</option><option value="ESYQBHYs3v19BFOVf0kE">Autumn V1</option><option value="FxZGJEWv5qumSVOAIEdy">Bri V2</option><option value="q0PSjemu2CZtmNK4W8lU">Kai</option></select>
+
+        <!-- Buttons and Audio Elements -->
+        <button id="recordBtn">Start Recording</button>
+        <button id="stopBtn" disabled="">Stop Recording</button>
+        <audio id="audioPlayback" controls=""></audio>
+        <button id="processBtn" disabled="">Process Voice</button>
+        <p id="status"></p>
+    </div>
+
+    <script>
+        const XI_API_KEY = 'sk_6eb2bd3d81bd21c7f0189f727b6912ad0511996402b96819';
+        let mediaRecorder;
+        let audioChunks = [];
+
+        // Fetch and display owned voices in the dropdown
+        async function fetchOwnedVoices() {
+            const response = await fetch("https://api.elevenlabs.io/v1/voices", {
+                method: 'GET',
+                headers: {
+                    'xi-api-key': XI_API_KEY
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const ownedVoices = data.voices.filter(voice => voice.is_owner === true);
+                const voiceSelect = document.getElementById('voiceSelect');
+
+                ownedVoices.forEach(voice => {
+                    const option = document.createElement('option');
+                    option.value = voice.voice_id;
+                    option.textContent = voice.name;
+                    voiceSelect.appendChild(option);
+                });
+
+                if (ownedVoices.length === 0) {
+                    document.getElementById('status').textContent = "No owned voices found.";
+                }
+            } else {
+                console.error("Failed to fetch voices:", await response.text());
+                document.getElementById('status').textContent = "Error fetching voices.";
+            }
+        }
+
+        // Call fetchOwnedVoices on page load
+        window.onload = fetchOwnedVoices;
+
+        // Start recording audio
+        document.getElementById('recordBtn').addEventListener('click', async () => {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.start();
+            audioChunks = [];
+
+            // Show recording animation
+            document.getElementById('recordingAnimation').style.display = 'block';
+
+            mediaRecorder.ondataavailable = event => {
+                audioChunks.push(event.data);
+            };
+
+            mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                const audioUrl = URL.createObjectURL(audioBlob);
+                document.getElementById('audioPlayback').src = audioUrl;
+                document.getElementById('processBtn').disabled = false;
+                document.getElementById('status').textContent = "Recording complete. Ready to process.";
+
+                // Hide recording animation
+                document.getElementById('recordingAnimation').style.display = 'none';
+            };
+
+            document.getElementById('stopBtn').disabled = false;
+            document.getElementById('recordBtn').disabled = true;
+        });
+
+        // Stop recording
+        document.getElementById('stopBtn').addEventListener('click', () => {
+            mediaRecorder.stop();
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('recordBtn').disabled = false;
+        });
+
+        // Get the current date and time in PST and format it
+        function getFormattedDateTime() {
+            const now = new Date();
+            const options = { timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
+            const formattedDate = now.toLocaleDateString('en-US', options).replace(/\//g, '-');
+            const formattedTime = now.toLocaleTimeString('en-US', { timeZone: 'America/Los_Angeles', hour12: false }).replace(/:/g, '-');
+            return `Autumn_${formattedDate}_${formattedTime}_PST.mp3`;
+        }
+
+        // Process the recorded audio with the selected voice
+        document.getElementById('processBtn').addEventListener('click', async () => {
+            const selectedVoiceId = document.getElementById('voiceSelect').value;
+            if (!selectedVoiceId) {
+                document.getElementById('status').textContent = "Please select a voice.";
+                return;
+            }
+
+            document.getElementById('status').textContent = "Processing...";
+            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+            const formData = new FormData();
+            formData.append('audio', audioBlob, 'recording.wav');
+            formData.append('model_id', "eleven_english_sts_v2");
+            formData.append('voice_settings', JSON.stringify({
+                "stability": 0.5,
+                "similarity_boost": 0.8,
+                "style": 0.0,
+                "use_speaker_boost": true
+            }));
+
+            try {
+                const response = await fetch(`https://api.elevenlabs.io/v1/speech-to-speech/${selectedVoiceId}/stream`, {
+                    method: 'POST',
+                    headers: {
+                        'xi-api-key': XI_API_KEY
+                    },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const downloadUrl = URL.createObjectURL(blob);
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = downloadUrl;
+                    downloadLink.download = getFormattedDateTime();
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    downloadLink.remove();
+                    document.getElementById('status').textContent = "Audio processed successfully!";
+                } else {
+                    const errorText = await response.text();
+                    document.getElementById('status').textContent = "Error processing audio: " + errorText;
+                }
+            } catch (error) {
+                document.getElementById('status').textContent = "Failed to process audio. CORS restrictions may apply.";
+                console.error("Error:", error);
+            }
+        });
+    </script>
+
+
+
+            <script>// Write JavaScript here</script>
+        
+    
+</body>

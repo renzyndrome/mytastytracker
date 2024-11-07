@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scrape Formatter</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            justify-content: center;
+        }
+
+        button {
+            margin: 20px;
+            padding: 20px;
+        }
+
+        ul{
+            list-style-type:none;
+            padding:0px;
+            margin:0px;
+        }
+
+        li{
+        display:inline;
+            padding-left:14px;
+        }
+
+    </style>
+</head>
+<body>
+    <textarea id="input" cols="20" rows="25" placeholder="Paste input here..."></textarea>
+    <button type="posts" onclick="clickedPosts()">Format Posts</button>
+    <button type="messages" onclick="clickedMessages()">Format Messages</button>
+    <script>
+        let pastearea = document.getElementById('input');
+        let linksarea = document.getElementById('links');
+        let links;
+        pastearea.addEventListener('paste', function(e) {
+            e.preventDefault();
+            let text = e.clipboardData.getData('text/plain');
+            pastearea.innerHTML = text;
+
+            let html = e.clipboardData.getData('text/html');
+            var div = document.createElement('div');
+            div.innerHTML = html.trim();
+            links = div.getElementsByTagName('a');
+        });
+
+        function searchLinks(date){
+            for (let i = 0; i < links.length; i++) {
+                const element = links[i];
+                if(element.text == date){
+                    return element.href;
+                }
+            }
+            return "";
+        }
+
+        function clickedPosts() {
+            let lines = document.getElementById("input").value.split("\n");
+            output = "Date,Link,Views,Tips,Price,Purchases,Captions"
+
+            console.log("Building data")
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i];
+                if (line === "FULL STAT" || line === "Purchases"){
+                    line = lines[++i];
+                    if(line === "Summary"){
+                        break;
+                    }
+                    output += "\r\n\"" + lines[i++] + "\",\"";
+                    output += searchLinks(lines[i-1]) + "\",\"";
+                    output += lines[i++] + "\",\"";
+                    output += lines[i++] + "\",\"";
+                    output += lines[i++] + "\",\"";
+                    output += lines[i++] + "\",\"";
+                    output += lines[i] + "\"";
+                }  
+            }
+
+            console.log(output);
+            const blob = new Blob([output], { type: 'text/csv;charset=utf-8,' })
+            const objUrl = URL.createObjectURL(blob)
+            const link = document.createElement('a')
+            link.setAttribute('href', objUrl)
+            link.setAttribute('download', 'posts.csv')
+            link.textContent = 'Click to Download'
+
+            document.querySelector('body').append(link)
+        }
+
+        function clickedMessages() {
+            let lines = document.getElementById("input").value.split("\n");
+            output = "Date,Sent,Viewed,Price,Purchases,Message"
+
+            console.log("Building data")
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i];
+                if (line === "UNSEND" || line === "Purchases"){
+                    line = lines[++i];
+                    if(line === "Summary"){
+                        break;
+                    }
+                    output += "\r\n\"" + lines[i++] + "\",\"";
+                    output += lines[i++] + "\",\"";
+                    output += lines[i++] + "\",\"";
+                    output += lines[i++] + "\",\"";
+                    output += lines[i++] + "\",\"";
+                    output += lines[i] + "\"";
+                }  
+            }
+
+            console.log(output);
+            const blob = new Blob([output], { type: 'text/csv;charset=utf-8,' })
+            const objUrl = URL.createObjectURL(blob)
+            const link = document.createElement('a')
+            link.setAttribute('href', objUrl)
+            link.setAttribute('download', 'messages.csv')
+            link.textContent = 'Click to Download'
+
+            document.querySelector('body').append(link)
+        }
+    </script>
+</body>
+</html>

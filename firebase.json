@@ -1,0 +1,32 @@
+{
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/postgen",
+        "destination": "/postgen.html"
+      },
+      {
+        "source": "/greetings",
+        "destination": "/greetings.html"
+      },
+      {
+        "source": "/autumnclone",
+        "destination": "/AutumnClone.html"
+      },
+      {
+        "source": "/voice-clone-v2",
+        "destination": "/voice_clone_v2.html"
+      },
+      {
+        "source": "/sandbox",
+        "destination": "/sandbox.html"
+      }
+    ]
+  }
+}

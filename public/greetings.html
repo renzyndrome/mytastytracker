@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Merge and Distort Audio Files</title>
+</head>
+<body>
+  <h1>Merge and Distort Audio with Background Noise</h1>
+  
+  <form id="audioForm">
+    <label for="audio1">Select Your Audio File:</label>
+    <input type="file" id="audio1" accept="audio/*" required><br><br>
+    
+    <label for="distortionAmount">Distortion Amount (0-100):</label>
+    <input type="range" id="distortionAmount" min="0" max="100" value="1"><br><br>
+    
+    <label for="customName">Enter File Name:</label>
+    <input type="text" id="customName" placeholder="Enter name for output file" required><br><br>
+    
+    <button type="button" onclick="mergeAndDistortAudio()">Merge & Distort Audio</button>
+  </form>
+
+  <h3 id="status"></h3>
+  
+  <audio id="mergedAudio" controls style="display:none"></audio>
+  <a id="downloadLink" style="display:none">Download Merged Audio</a>
+
+  <script>
+    async function mergeAndDistortAudio() {
+      const audio1File = document.getElementById('audio1').files[0];
+      const distortionAmount = document.getElementById('distortionAmount').value;
+      const customName = document.getElementById('customName').value.trim();
+
+      if (!audio1File) {
+        alert('Please select your audio file.');
+        return;
+      }
+
+      if (!customName) {
+        alert('Please enter a name for the output file.');
+        return;
+      }
+
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const audio1Buffer = await fileToAudioBuffer(audioContext, audio1File);
+
+      // Fetch the background noise audio file from the same directory
+      const backgroundBuffer = await fetchAudioBuffer(audioContext, './background-noise.mp3');
+
+      // Determine the duration (in samples) of the uploaded audio
+      const uploadedAudioLength = audio1Buffer.length;
+
+      // Ensure the background audio is longer than the uploaded audio
+      if (backgroundBuffer.length <= uploadedAudioLength) {
+        alert('Background noise audio is shorter than the uploaded audio.');
+        return;
+      }
+
+      // Select a random starting point in the background noise audio
+      const maxStartIndex = backgroundBuffer.length - uploadedAudioLength;
+      const randomStartIndex = Math.floor(Math.random() * maxStartIndex);
+
+      // Extract the segment from the background noise audio
+      const backgroundSegment = extractAudioSegment(audioContext, backgroundBuffer, randomStartIndex, uploadedAudioLength);
+
+      // Create a new buffer for the output
+      const outputBuffer = audioContext.createBuffer(
+        audio1Buffer.numberOfChannels,
+        uploadedAudioLength,
+        audioContext.sampleRate
+      );
+
+      // Merge the uploaded audio and the background segment
+      for (let channel = 0; channel < outputBuffer.numberOfChannels; channel++) {
+        const outputData = outputBuffer.getChannelData(channel);
+        const audio1Data = audio1Buffer.getChannelData(channel % audio1Buffer.numberOfChannels);
+        const backgroundData = backgroundSegment.getChannelData(channel % backgroundSegment.numberOfChannels);
+
+        for (let i = 0; i < uploadedAudioLength; i++) {
+          outputData[i] = (audio1Data[i] || 0) + (backgroundData[i] || 0); // Mix the audio tracks
+        }
+      }
+
+      // Apply distortion effect
+      const distortedBuffer = await applyDistortion(audioContext, outputBuffer, distortionAmount);
+
+      // Convert to Blob for playback and download
+      const mergedAudioBlob = await audioBufferToBlob(distortedBuffer, audioContext);
+      const mergedAudioUrl = URL.createObjectURL(mergedAudioBlob);
+      
+      // Play distorted audio
+      const mergedAudioElement = document.getElementById('mergedAudio');
+      mergedAudioElement.src = mergedAudioUrl;
+      mergedAudioElement.style.display = 'block';
+      mergedAudioElement.play();
+
+      // Generate filename with current PST date and time
+      const timestamp = new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" });
+      const formattedTimestamp = timestamp.replace(/[/, :]/g, '-'); // Format to remove invalid filename characters
+      const filename = `${customName}_${formattedTimestamp}.wav`;
+
+      // Provide download link with the generated filename
+      const downloadLink = document.getElementById('downloadLink');
+      downloadLink.href = mergedAudioUrl;
+      downloadLink.download = filename;
+      downloadLink.style.display = 'block';
+      downloadLink.textContent = `Download ${filename}`;
+    }
+
+    // Helper: Convert file to AudioBuffer
+    function fileToAudioBuffer(audioContext, file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = async () => {
+          const arrayBuffer = reader.result;
+          audioContext.decodeAudioData(arrayBuffer, (audioBuffer) => {
+            resolve(audioBuffer);
+          }, (error) => {
+            reject(error);
+          });
+        };
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    // Helper: Fetch audio from local file and convert to AudioBuffer
+    async function fetchAudioBuffer(audioContext, url) {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('Failed to load background audio file.');
+      }
+      const arrayBuffer = await response.arrayBuffer();
+      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+      return audioBuffer;
+    }
+
+    // Helper: Extract a segment from an AudioBuffer
+    function extractAudioSegment(audioContext, audioBuffer, startIndex, length) {
+      const numberOfChannels = audioBuffer.numberOfChannels;
+      const sampleRate = audioBuffer.sampleRate;
+
+      const segmentBuffer = audioContext.createBuffer(
+        numberOfChannels,
+        length,
+        sampleRate
+      );
+
+      for (let channel = 0; channel < numberOfChannels; channel++) {
+        const channelData = audioBuffer.getChannelData(channel);
+        const segmentData = segmentBuffer.getChannelData(channel);
+        for (let i = 0; i < length; i++) {
+          segmentData[i] = channelData[startIndex + i];
+        }
+      }
+
+      return segmentBuffer;
+    }
+
+    // Helper: Apply Distortion
+    async function applyDistortion(audioContext, buffer, amount) {
+      const offlineContext = new OfflineAudioContext(
+        buffer.numberOfChannels,
+        buffer.length,
+        buffer.sampleRate
+      );
+
+      const source = offlineContext.createBufferSource();
+      source.buffer = buffer;
+
+      // Create distortion node
+      const distortion = offlineContext.createWaveShaper();
+      distortion.curve = makeDistortionCurve(amount);
+      distortion.oversample = '4x';
+
+      source.connect(distortion);
+      distortion.connect(offlineContext.destination);
+
+      source.start();
+      const renderedBuffer = await offlineContext.startRendering();
+      return renderedBuffer;
+    }
+
+    // Helper: Create distortion curve
+    function makeDistortionCurve(amount) {
+      const k = amount * 10;
+      const nSamples = 44100;
+      const curve = new Float32Array(nSamples);
+      const deg = Math.PI / 180;
+      for (let i = 0; i < nSamples; ++i) {
+        const x = (i * 2) / nSamples - 1;
+        curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
+      }
+      return curve;
+    }
+
+    // Helper: Convert AudioBuffer to Blob
+    async function audioBufferToBlob(buffer, audioContext) {
+      const offlineContext = new OfflineAudioContext(
+        buffer.numberOfChannels,
+        buffer.length,
+        buffer.sampleRate
+      );
+
+      const source = offlineContext.createBufferSource();
+      source.buffer = buffer;
+      source.connect(offlineContext.destination);
+      source.start();
+
+      const renderedBuffer = await offlineContext.startRendering();
+      return audioBufferToWavBlob(renderedBuffer);
+    }
+
+    // Helper: Convert AudioBuffer to WAV Blob
+    function audioBufferToWavBlob(buffer) {
+      const numOfChannels = buffer.numberOfChannels;
+      const length = buffer.length * numOfChannels * 2 + 44;
+      const bufferArray = new ArrayBuffer(length);
+      const view = new DataView(bufferArray);
+      const channels = [];
+      const sampleRate = buffer.sampleRate;
+
+      for (let i = 0; i < numOfChannels; i++) {
+        channels.push(buffer.getChannelData(i));
+      }
+
+      writeString(view, 0, 'RIFF');
+      view.setUint32(4, 36 + buffer.length * numOfChannels * 2, true);
+      writeString(view, 8, 'WAVE');
+      writeString(view, 12, 'fmt ');
+      view.setUint32(16, 16, true);
+      view.setUint16(20, 1, true);
+      view.setUint16(22, numOfChannels, true);
+      view.setUint32(24, sampleRate, true);
+      view.setUint32(28, sampleRate * numOfChannels * 2, true);
+      view.setUint16(32, numOfChannels * 2, true);
+      view.setUint16(34, 16, true);
+      writeString(view, 36, 'data');
+      view.setUint32(40, buffer.length * numOfChannels * 2, true);
+
+      let offset = 44;
+      for (let i = 0; i < buffer.length; i++) {
+        for (let channel = 0; channel < numOfChannels; channel++) {
+          let sample = channels[channel][i] * 32767;
+          sample = Math.max(-32768, Math.min(32767, sample));
+          view.setInt16(offset, sample, true);
+          offset += 2;
+        }
+      }
+
+      return new Blob([view], { type: 'audio/wav' });
+    }
+
+    function writeString(view, offset, string) {
+      for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+      }
+    }
+  </script>
+</body>
+</html>

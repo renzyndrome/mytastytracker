@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Schedule Tracker</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            justify-content: center;
+            overflow: hidden; /* Hide scrollbars */
+            height: 100%;
+            background-image: url(https://i.imgur.com/KBCYj8f.jpeg); /* Replace with your image URL */
+            background-size: cover;  /* Ensures the image covers the entire background */
+            background-position: center; /* Centers the image */
+            background-attachment: fixed; /* Keeps the image fixed during scroll */
+        }
+
+        button {
+            margin: 20px;
+            padding: 20px;
+        }
+
+        .clock {
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            background-color:#333;
+            color:#fff;
+            font-size:48px;
+            padding:20px;
+            border-radius:8px;
+            margin:20px;
+            letter-spacing:2px;
+        }
+
+        .schedule-row {
+            display: flex;
+            padding: 20px;
+            text-align: center;
+            gap: 10px;
+        }
+
+        .schedule-cell {
+            flex-grow: 1;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            background-color: #eee;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .timer {
+            font-weight: bold;
+            padding: 5px;
+            margin-top: 5px;
+            display: inline-block;
+            width: 100px;
+            background-color: #fff;
+            border-radius: 4px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="clock" id="clock">--:--:-- PST</div>
+    <div class="schedule-row">
+        <div class="schedule-cell #1A" id="1A">
+            <div>#1A</div>
+            <div id="1Atitle"></div>
+            <div id="1Asubtitle"></div>
+            <div class="timer" id="1ATimer">--:--:--</div>
+        </div>
+        <div class="schedule-cell #1B" id="1B">
+            <div>#1B</div>
+            <div id="1Btitle"></div>
+            <div id="1Bsubtitle"></div>
+            <div class="timer" id="1BTimer">--:--:--</div>
+        </div>
+        <div class="schedule-cell #1C" id="1C">
+            <div>#1C</div>
+            <div id="1Ctitle"></div>
+            <div id="1Csubtitle"></div>
+            <div class="timer" id="1CTimer">--:--:--</div>
+        </div>
+        <div class="schedule-cell #1D" id="1D">
+            <div>#1D</div>
+            <div id="1Dtitle"></div>
+            <div id="1Dsubtitle"></div>
+            <div class="timer" id="1DTimer">--:--:--</div>
+        </div>
+        <div class="schedule-cell #1E" id="1E">
+            <div>#1E</div>
+            <div id="1Etitle"></div>
+            <div id="1Esubtitle"></div>
+            <div class="timer" id="1ETimer">--:--:--</div>
+        </div>
+        <div class="schedule-cell #1F" id="1F">
+            <div>#1F</div>
+            <div id="1Ftitle"></div>
+            <div id="1Fsubtitle"></div>
+            <div class="timer" id="1FTimer">--:--:--</div>
+        </div>
+        <div class="schedule-cell #1G" id="1G">
+            <div>#1G</div>
+            <div id="1Gtitle"></div>
+            <div id="1Gsubtitle"></div>
+            <div class="timer" id="1GTimer">--:--:--</div>
+        </div>
+    </div>
+    <button onclick="passwordCheck()">Team Pages</button>
+    <a href="time.html" target="_blank">
+        <button>Time Shifter</button>
+    </a>
+    <button onclick="passwordCheck2()">Model Info</button>
+
+    <script>
+
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+        const ids = ["1A", "1B", "1C", "1D", "1E", "1F", "1G"];
+        const titles = ["Running Queue", "Upcoming Day", "Flyer & Folder Team", "Paywall Team", "Caption Replacing", "", ""];
+        const subtitles = ["", "Starting", "Time Left", "Time Left", "Time Left", "Not Running", "Not Running"];
+        const colors = ["#a4c2f4", "#e4dfec", "#fff2cc", "#f4cccc", "#fff2cc", "#eee", "#eee"];
+        const timerType = ["clock", "down", "down", "down", "down", "none", "none"]
+
+        document.addEventListener('DOMContentLoaded', () => {
+            start();
+        });
+
+        function start() {
+            setInterval(update, 1000); // Update every second
+        }
+
+        function update() {
+
+            const time = new Date();
+            
+            // Adjust to current PST time (with daylight savings accounted)
+            time.setTime(time.getTime() + (time.getTimezoneOffset() * 60000) - (7 * 60 * 60000) - 3600000);
+
+            const pst = new Date(time);
+            document.getElementById('clock').textContent = formatTime12hr(pst) + " PST";
+
+            // Offset time to midnight -> 5pm
+            time.setHours(time.getHours() - 17);
+
+            const offset = time.getDay() + 1;
+
+            for (let i = 0; i < ids.length; i++) {
+                document.getElementById(ids[i] + 'title').textContent = titles[(7 - offset + i) % 7];
+                document.getElementById(ids[i] + 'subtitle').textContent = subtitles[(7 - offset + i) % 7];
+                document.getElementById(ids[i]).style.backgroundColor = colors[(7 - offset + i) % 7];
+
+                if(timerType[(7 - offset + i) % 7] == "up"){
+                    document.getElementById(ids[i] + 'Timer').textContent = formatTime(time);
+                }
+                else if(timerType[(7 - offset + i) % 7] == "clock"){
+                    document.getElementById(ids[i] + 'Timer').textContent = formatTime12hr(pst);
+                    document.getElementById(ids[i] + 'subtitle').textContent = monthNames[pst.getMonth()] + " " + pst.getDate();
+                }
+                else if(timerType[(7 - offset + i) % 7] == "down"){
+                    document.getElementById(ids[i] + 'Timer').textContent = formatTimeCountDownLessOneHour(time);
+                }
+                else {
+                    document.getElementById(ids[i] + 'Timer').textContent = "--:--:--";
+                }
+            }
+        }
+
+        function formatTime(date) {
+            let hours = date.getHours();
+            let minutes = date.getMinutes();
+            let seconds = date.getSeconds();
+            
+            hours = hours < 10 ? '0' + hours : hours;
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+            
+            return `${hours}:${minutes}:${seconds}`;
+        }
+
+        function formatTime12hr(date) {
+            let hours = date.getHours();
+            let minutes = date.getMinutes();
+            let seconds = date.getSeconds();
+            let suffix = hours >= 12 ? 'PM' : 'AM';
+
+            hours = hours % 12;
+
+            if(hours == 0){
+                hours = 12;
+            }
+            
+            hours = hours < 10 ? '0' + hours : hours;
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+            
+            return `${hours}:${minutes}:${seconds} ${suffix}`;
+        }
+
+        function formatTimeCountDownLessOneHour(date) {
+            // Set target time to the next 11 PM (23:00:00) of the current day or next day if already past 11 PM
+            let targetTime = new Date(date);
+            targetTime.setHours(23, 0, 0, 0);
+
+            // If it's already past 11 PM today, set the target to 11 PM tomorrow
+            if (date >= targetTime) {
+                targetTime.setDate(targetTime.getDate() + 1);
+            }
+
+            // Calculate the difference in milliseconds
+            let difference = targetTime - date;
+
+            // Calculate hours, minutes, and seconds from the difference
+            let hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
+            let minutes = Math.floor((difference / (1000 * 60)) % 60);
+            let seconds = Math.floor((difference / 1000) % 60);
+
+            // Format each component to ensure two digits
+            hours = hours < 10 ? '0' + hours : hours;
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+
+            return `${hours}:${minutes}:${seconds}`;
+        }
+
+
+        function passwordCheck() {
+            let input = prompt("Please enter password", "");
+            if (input == "Caden") {
+                window.open("./teampage.html", '_blank').focus();
+            }
+        }
+
+        function passwordCheck2() {
+            let input = prompt("Please enter password", "");
+            if (input == "Caden1") {
+                window.open("./modelinfo.html", '_blank').focus();
+            }
+        }
+    </script>
+</body>
+</html>

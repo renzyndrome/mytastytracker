@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Schedule Tracker</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            justify-content: center;
+        }
+
+        button {
+            margin: 20px;
+            padding: 20px;
+        }
+
+        ul{
+            list-style-type:none;
+            padding:0px;
+            margin:0px;
+        }
+
+        li{
+        display:inline;
+            padding-left:14px;
+        }
+
+    </style>
+</head>
+<body>
+    <textarea id="times" cols="20" rows="25" placeholder="Paste times here..."></textarea>
+    <textarea id="offset" placeholder="Shift by..."></textarea>
+    <button type="submit" onclick="clicked()">Shift</button>
+    <textarea id="output" cols="20" rows="25"></textarea>
+    <script>
+        function clicked() {
+            let times = document.getElementById("times").value.split("\n");
+            let offset = Number(document.getElementById("offset").value);
+            let output = ""
+            times.forEach(time => {
+                output += shift(time, offset) + "\n";
+            });
+
+            document.getElementById('output').value = output;
+        }
+
+        function shift(timeString, offset){
+            let [hoursString, temp] = timeString.split(":");
+            let [minutesString, suffix] = temp.split(" ");
+            hours = parseInt(hoursString);
+            minutes = parseInt(minutesString);
+
+            if(hours === 12){
+                hours = 0;
+            }
+
+            minutes += offset;
+
+            while(minutes < 0){
+                hours--;
+                minutes += 60;
+            }
+
+            while(minutes > 59){
+                hours++;
+                minutes -= 60;
+            }
+
+            while(hours < 0){
+                hours += 12;
+                if(suffix === "AM")
+                    suffix = "PM";
+                else
+                    suffix = "AM";
+            }
+
+            while(hours > 12){
+                hours -= 12;
+                if(suffix === "AM")
+                    suffix = "PM";
+                else
+                    suffix = "AM";
+            }
+
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            
+            if(hours === 0){
+                hours = 12;
+            }
+            
+            return `${hours}:${minutes} ${suffix}`;
+        }
+    </script>
+</body>
+</html>

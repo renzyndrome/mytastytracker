@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+            <style></style>
+        </head>
+        <body>
+            
+
+
+    <meta charset="UTF-8">
+    <title>Autumn Voice Clone</title>
+    <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body Styling */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #FF7EB9, #FF65A3, #7AF9FF);
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Container Styling */
+        .container {
+            background: #FFFFFF;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        /* Header Styling */
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #FF65A3;
+        }
+
+        /* Button Styling */
+        button {
+            background-color: #FF4081;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 15px;
+            font-size: 1rem;
+            font-weight: bold;
+            width: 100%;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        button:hover:enabled {
+            background-color: #FF65A3;
+        }
+
+        /* Audio Player */
+        audio {
+            width: 100%;
+            margin-top: 20px;
+            outline: none;
+        }
+
+        /* Status Message */
+        #status {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #FF4081;
+        }
+    </style>
+
+
+    <div class="container">
+        <h1>Autumn Voice Clone</h1>
+        
+        <!-- Buttons and Audio Elements -->
+        <button id="recordBtn">Start Recording</button>
+        <button id="stopBtn" disabled="">Stop Recording</button>
+        <audio id="audioPlayback" controls=""></audio>
+        <button id="processBtn" disabled="">Process Clone</button>
+        <p id="status"></p>
+    </div>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+
+        // Start recording audio
+        document.getElementById('recordBtn').addEventListener('click', async () => {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.start();
+            audioChunks = [];
+
+            mediaRecorder.ondataavailable = event => {
+                audioChunks.push(event.data);
+            };
+
+            mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                const audioUrl = URL.createObjectURL(audioBlob);
+                document.getElementById('audioPlayback').src = audioUrl;
+                document.getElementById('processBtn').disabled = false;
+                document.getElementById('status').textContent = "Recording complete. Ready to process.";
+            };
+
+            document.getElementById('stopBtn').disabled = false;
+            document.getElementById('recordBtn').disabled = true;
+        });
+
+        // Stop recording
+        document.getElementById('stopBtn').addEventListener('click', () => {
+            mediaRecorder.stop();
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('recordBtn').disabled = false;
+        });
+
+        // Get the current date and time in PST and format it
+        function getFormattedDateTime() {
+            const now = new Date();
+            const options = { timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
+            const formattedDate = now.toLocaleDateString('en-US', options).replace(/\//g, '-');
+            const formattedTime = now.toLocaleTimeString('en-US', { timeZone: 'America/Los_Angeles', hour12: false }).replace(/:/g, '-');
+            return `Autumn_${formattedDate}_${formattedTime}_PST.mp3`;
+        }
+
+        // Process the recorded audio with Eleven Labs API
+        document.getElementById('processBtn').addEventListener('click', async () => {
+            document.getElementById('status').textContent = "Processing...";
+            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+            const formData = new FormData();
+            formData.append('audio', audioBlob, 'recording.wav');
+            formData.append('model_id', "eleven_english_sts_v2");
+            formData.append('voice_settings', JSON.stringify({
+                "stability": 0.5,
+                "similarity_boost": 0.8,
+                "style": 0.0,
+                "use_speaker_boost": true
+            }));
+
+            try {
+                const response = await fetch(`https://api.elevenlabs.io/v1/speech-to-speech/48t7aXhrDOcByXT0Ewuz/stream`, {
+                    method: 'POST',
+                    headers: {
+                        'xi-api-key': 'sk_6eb2bd3d81bd21c7f0189f727b6912ad0511996402b96819'  // Ensure this is your latest API key
+                    },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const downloadUrl = URL.createObjectURL(blob);
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = downloadUrl;
+                    downloadLink.download = getFormattedDateTime();
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    downloadLink.remove();
+                    document.getElementById('status').textContent = "Audio processed successfully!";
+                } else {
+                    const errorText = await response.text();
+                    document.getElementById('status').textContent = "Error processing audio: " + errorText;
+                }
+            } catch (error) {
+                document.getElementById('status').textContent = "Failed to process audio. CORS restrictions may apply.";
+                console.error("Error:", error);
+            }
+        });
+    </script>
+
+
+
+            <script>// Write JavaScript here</script>
+        
+    
+</body>
