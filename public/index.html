@@ -1,21 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dynamic Schedule Tracker</title>
     <style>
-        body, html {
+        body,
+        html {
             margin: 0;
             padding: 0;
             font-family: 'Arial', sans-serif;
             justify-content: center;
-            overflow: hidden; /* Hide scrollbars */
+            overflow: hidden;
+            /* Hide scrollbars */
             height: 100%;
-            background-image: url(https://i.imgur.com/KBCYj8f.jpeg); /* Replace with your image URL */
-            background-size: cover;  /* Ensures the image covers the entire background */
-            background-position: center; /* Centers the image */
-            background-attachment: fixed; /* Keeps the image fixed during scroll */
+            /* background-image: url(''); */
+            /* Replace with your image URL */
+            background-size: cover;
+            /* Ensures the image covers the entire background */
+            background-position: center;
+            /* Centers the image */
+            background-attachment: fixed;
+            /* Keeps the image fixed during scroll */
         }
 
         button {
@@ -24,16 +31,16 @@
         }
 
         .clock {
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            background-color:#333;
-            color:#fff;
-            font-size:48px;
-            padding:20px;
-            border-radius:8px;
-            margin:20px;
-            letter-spacing:2px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #333;
+            color: #fff;
+            font-size: 48px;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px;
+            letter-spacing: 2px;
         }
 
         .schedule-row {
@@ -49,7 +56,7 @@
             border-radius: 4px;
             padding: 10px;
             background-color: #eee;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .timer {
@@ -61,9 +68,9 @@
             background-color: #fff;
             border-radius: 4px;
         }
-
     </style>
 </head>
+
 <body>
     <div class="clock" id="clock">--:--:-- PST</div>
     <div class="schedule-row">
@@ -116,14 +123,15 @@
     </a>
     <button onclick="passwordCheck2()">Model Info</button>
 
+
     <script>
 
         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
         const ids = ["1A", "1B", "1C", "1D", "1E", "1F", "1G"];
-        const titles = ["Running Queue", "Upcoming Day", "Flyer & Folder Team", "Paywall Team", "Caption Replacing", "", ""];
-        const subtitles = ["", "Starting", "Time Left", "Time Left", "Time Left", "Not Running", "Not Running"];
-        const colors = ["#a4c2f4", "#e4dfec", "#fff2cc", "#f4cccc", "#fff2cc", "#eee", "#eee"];
+        const titles = ["Generate Post", "Upcoming Day",];
+        const subtitles = ["", "Starting", "Not Running", "Not Running", "Not Running", "Not Running", "Post Link Drops"];
+        const colors = ["#a4c2f4", "#e4dfec", "#eee", "#eee", "#eee", "#eee", "#50C878"];
         const timerType = ["clock", "down", "down", "down", "down", "none", "none"]
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -137,14 +145,17 @@
         function update() {
 
             const time = new Date();
-            
+
+            //get current PST time
+            // time.setTime(time.getTime() + (time.getTimezoneOffset() * 60000) - (7 * 60 * 60000));
+
             // Adjust to current PST time (with daylight savings accounted)
             time.setTime(time.getTime() + (time.getTimezoneOffset() * 60000) - (7 * 60 * 60000) - 3600000);
 
             const pst = new Date(time);
             document.getElementById('clock').textContent = formatTime12hr(pst) + " PST";
 
-            // Offset time to midnight -> 5pm
+            //offset time to midnight -> 5pm
             time.setHours(time.getHours() - 17);
 
             const offset = time.getDay() + 1;
@@ -154,15 +165,15 @@
                 document.getElementById(ids[i] + 'subtitle').textContent = subtitles[(7 - offset + i) % 7];
                 document.getElementById(ids[i]).style.backgroundColor = colors[(7 - offset + i) % 7];
 
-                if(timerType[(7 - offset + i) % 7] == "up"){
+                if (timerType[(7 - offset + i) % 7] == "up") {
                     document.getElementById(ids[i] + 'Timer').textContent = formatTime(time);
                 }
-                else if(timerType[(7 - offset + i) % 7] == "clock"){
+                else if (timerType[(7 - offset + i) % 7] == "clock") {
                     document.getElementById(ids[i] + 'Timer').textContent = formatTime12hr(pst);
                     document.getElementById(ids[i] + 'subtitle').textContent = monthNames[pst.getMonth()] + " " + pst.getDate();
                 }
-                else if(timerType[(7 - offset + i) % 7] == "down"){
-                    document.getElementById(ids[i] + 'Timer').textContent = formatTimeCountDownLessOneHour(time);
+                else if (timerType[(7 - offset + i) % 7] == "down") {
+                    document.getElementById(ids[i] + 'Timer').textContent = formatTimeCountDown(time);
                 }
                 else {
                     document.getElementById(ids[i] + 'Timer').textContent = "--:--:--";
@@ -174,11 +185,11 @@
             let hours = date.getHours();
             let minutes = date.getMinutes();
             let seconds = date.getSeconds();
-            
+
             hours = hours < 10 ? '0' + hours : hours;
             minutes = minutes < 10 ? '0' + minutes : minutes;
             seconds = seconds < 10 ? '0' + seconds : seconds;
-            
+
             return `${hours}:${minutes}:${seconds}`;
         }
 
@@ -190,43 +201,28 @@
 
             hours = hours % 12;
 
-            if(hours == 0){
+            if (hours == 0) {
                 hours = 12;
             }
-            
+
             hours = hours < 10 ? '0' + hours : hours;
             minutes = minutes < 10 ? '0' + minutes : minutes;
             seconds = seconds < 10 ? '0' + seconds : seconds;
-            
+
             return `${hours}:${minutes}:${seconds} ${suffix}`;
         }
 
-        function formatTimeCountDownLessOneHour(date) {
-            // Set target time to the next 11 PM (23:00:00) of the current day or next day if already past 11 PM
-            let targetTime = new Date(date);
-            targetTime.setHours(23, 0, 0, 0);
+        function formatTimeCountDown(date) {
+            let hours = 23 - date.getHours();
+            let minutes = 59 - date.getMinutes();
+            let seconds = 59 - date.getSeconds();
 
-            // If it's already past 11 PM today, set the target to 11 PM tomorrow
-            if (date >= targetTime) {
-                targetTime.setDate(targetTime.getDate() + 1);
-            }
-
-            // Calculate the difference in milliseconds
-            let difference = targetTime - date;
-
-            // Calculate hours, minutes, and seconds from the difference
-            let hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
-            let minutes = Math.floor((difference / (1000 * 60)) % 60);
-            let seconds = Math.floor((difference / 1000) % 60);
-
-            // Format each component to ensure two digits
             hours = hours < 10 ? '0' + hours : hours;
             minutes = minutes < 10 ? '0' + minutes : minutes;
             seconds = seconds < 10 ? '0' + seconds : seconds;
 
             return `${hours}:${minutes}:${seconds}`;
         }
-
 
         function passwordCheck() {
             let input = prompt("Please enter password", "");
@@ -241,6 +237,114 @@
                 window.open("./modelinfo.html", '_blank').focus();
             }
         }
+        const holidayBackgrounds = {
+            newYear: [
+                "https://images.pexels.com/photos/3408744/pexels-photo-3408744.jpeg",
+                "https://images.pexels.com/photos/3171837/pexels-photo-3171837.jpeg",
+                "https://images.pexels.com/photos/3408746/pexels-photo-3408746.jpeg"
+            ],
+            valentinesDay: [
+                "https://images.pexels.com/photos/1028724/pexels-photo-1028724.jpeg",
+                "https://images.pexels.com/photos/1028725/pexels-photo-1028725.jpeg",
+                "https://images.pexels.com/photos/1028726/pexels-photo-1028726.jpeg"
+            ],
+            easter: [
+                "https://images.unsplash.com/photo-1496661415325-ef852f9e8e7c?q=80&w=2127&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+                "https://images.unsplash.com/photo-1617031035761-24670230124f?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+                "https://plus.unsplash.com/premium_photo-1676686124921-f2a33e9b7046?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            ],
+            independenceDay: [
+                "https://images.pexels.com/photos/4669118/pexels-photo-4669118.jpeg",
+                "https://images.pexe    ls.com/photos/4669119/pexels-photo-4669119.jpeg",
+                "https://images.pexels.com/photos/4669120/pexels-photo-4669120.jpeg"
+            ],
+            halloween: [
+                "https://images.pexels.com/photos/619419/pexels-photo-619419.jpeg",
+                "https://images.pexels.com/photos/619420/pexels-photo-619420.jpeg",
+                "https://images.pexels.com/photos/619421/pexels-photo-619421.jpeg"
+            ],
+            thanksgiving: [
+                "https://plus.unsplash.com/premium_photo-1666185806700-a1c4638c2c28?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+                "https://images.unsplash.com/photo-1477414348463-c0eb7f1359b6?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+                "https://images.unsplash.com/photo-1514064019862-23e2a332a6a6?q=80&w=2028&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            ],
+            christmas: [
+                "https://images.unsplash.com/photo-1480422080719-4d25a4c7e22c?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+                "https://plus.unsplash.com/premium_photo-1698530721644-e158a624ecf2?q=80&w=2018&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+                "https://images.unsplash.com/photo-1512389142860-9c449e58a543?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            ],
+            defaultSpring: [
+                "https://images.pexels.com/photos/712786/pexels-photo-712786.jpeg",
+                "https://images.pexels.com/photos/414612/pexels-photo-414612.jpeg",
+                "https://images.pexels.com/photos/34950/pexels-photo.jpg"
+            ],
+            defaultSummer: [
+                "https://images.pexels.com/photos/457882/pexels-photo-457882.jpeg",
+                "https://images.pexels.com/photos/248616/pexels-photo-248616.jpeg",
+                "https://images.pexels.com/photos/457944/pexels-photo-457944.jpeg"
+            ],
+            defaultAutumn: [
+                "https://images.pexels.com/photos/1338695/pexels-photo-1338695.jpeg",
+                "https://images.pexels.com/photos/33109/fall-autumn-red-season.jpg",
+                "https://images.pexels.com/photos/235721/pexels-photo-235721.jpeg"
+            ],
+            defaultWinter: [
+                "https://images.unsplash.com/photo-1480497490787-505ec076689f?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+                "https://plus.unsplash.com/premium_photo-1675714692733-bc27da8f6f0e?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+                "https://images.unsplash.com/photo-1473654729523-203e25dfda10?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            ]
+        };
+
+        function setHolidayOrSeasonBackground() {
+            const currentDate = new Date();
+            const currentTheme = getHolidayOrSeason(currentDate);
+            const backgrounds = holidayBackgrounds[currentTheme];
+            const randomIndex = Math.floor(Math.random() * backgrounds.length);
+            const randomBackground = backgrounds[randomIndex];
+
+            // Ensure the URL is valid before applying
+            if (randomBackground) {
+                document.documentElement.style.backgroundImage = `url("${randomBackground}")`;
+                document.documentElement.style.backgroundSize = "cover";
+                document.documentElement.style.backgroundPosition = "center";
+                document.documentElement.style.backgroundAttachment = "fixed";
+            } else {
+                console.error("Background not found for theme:", currentTheme);
+            }
+        }
+
+        // Updated holiday detection logic
+        function getHolidayOrSeason(date) {
+            const month = date.getMonth() + 1; // Months are 0-indexed
+            const day = date.getDate();
+
+            // Holiday checks
+            if (month === 1 && day === 1) return "newYear";
+            if (month === 1 && day >= 15 && day <= 21 && date.getDay() === 1) return "martinLutherKingJrDay"; // 3rd Monday of January
+            if (month === 2 && day === 14) return "valentinesDay";
+            if (month === 2 && day >= 15 && day <= 21 && date.getDay() === 1) return "presidentsDay"; // 3rd Monday of February
+            if (month === 4 && day >= 1 && day <= 30 && date.getDay() === 0) return "easter"; // Placeholder for Easter Sunday
+            if (month === 5 && day >= 25 && day <= 31 && date.getDay() === 1) return "memorialDay"; // Last Monday of May
+            if (month === 7 && day === 4) return "independenceDay";
+            if (month === 9 && day >= 1 && day <= 7 && date.getDay() === 1) return "laborDay"; // 1st Monday of September
+            if (month === 10 && day >= 20 && day <= 31) return "halloween";
+            if (month === 11 && day >= 22 && day <= 28 && date.getDay() === 4) return "thanksgiving"; // 4th Thursday of November
+            if (month === 12 && day >= 1 && day <= 25) return "christmas";
+
+            // Default to seasons
+            if (month >= 3 && month <= 5) return "defaultSpring";
+            if (month >= 6 && month <= 8) return "defaultSummer";
+            if (month >= 9 && month <= 11) return "defaultAutumn";
+            return "defaultWinter";
+        }
+
+        // Call the function to set the background on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            start(); // Start the existing schedule update
+            setHolidayOrSeasonBackground();
+        });
+
     </script>
 </body>
+
 </html>

@@ -6,7 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sandbox Editor</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@2.0.0/dist/full.css" rel="stylesheet">
     <style>
+        /* Ensure everything behaves as expected */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -14,7 +17,7 @@
         }
 
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto', sans-serif;
             height: 100vh;
             overflow: hidden;
         }
@@ -30,8 +33,8 @@
             position: fixed;
             top: 10px;
             right: 10px;
-            width: 45%;
-            height: 60%;
+            width: 30%;
+            height: 50%;
             background-color: #f5f5f5;
             border: 2px solid #ddd;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -41,84 +44,58 @@
         }
 
         #editor-header {
-            background-color: #007bff;
-            color: #fff;
-            padding: 10px;
             cursor: move;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-family: 'Roboto', sans-serif;
-            font-weight: 700;
-        }
-
-        #editor-header button {
-            background: none;
-            border: none;
-            color: #fff;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        #file-input {
-            margin-left: 10px;
-            font-size: 14px;
-        }
-
-        textarea {
-            width: 100%;
-            height: calc(100% - 90px);
-            resize: none;
-            border: none;
-            padding: 10px;
-            font-family: monospace;
-            font-size: 16px;
         }
 
         #deploy-btn {
             margin: 10px;
-            background-color: #28a745;
-            color: #fff;
-            padding: 10px;
             border: none;
             cursor: pointer;
-            border-radius: 4px;
-            font-family: 'Roboto', sans-serif;
-            font-weight: 700;
         }
 
         #minimized-editor {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            background-color: #007bff;
-            color: #fff;
-            padding: 10px;
-            cursor: pointer;
             display: none;
             border-radius: 4px;
         }
     </style>
 </head>
 
-<body>
+<body class="bg-gray-100">
     <div id="preview">
-        <iframe id="output" frameborder="0" style="width: 100%; height: 100%;"></iframe>
+        <iframe id="output" frameborder="0" class="w-full h-full rounded-lg shadow-lg"></iframe>
     </div>
 
-    <div id="editor-container">
-        <div id="editor-header">
-            <span>Editor</span>
-            <div>
-                <input type="file" id="file-input" accept=".html">
-                <button id="minimize-btn">-</button>
+    <div id="editor-container" class="bg-white border rounded-lg shadow-lg">
+        <div id="editor-header" class="bg-blue-600 text-white p-3 flex justify-between items-center">
+            <span class="font-bold">Editor</span>
+            <div class="flex items-center space-x-2 h-10">
+                <input type="file" id="file-input" accept=".html" class="input input-md">
+                <button id="minimize-btn" class="text-white btn btn-box btn-md"> -- </button>
             </div>
         </div>
-        <textarea id="code" placeholder="Write your HTML, CSS, and JavaScript here..."></textarea>
-        <button id="deploy-btn">Deploy to Firebase</button>
+        <textarea id="code"
+            class="w-full bg-gray-800 h-2/3 resize-none border-none p-3 font-mono text-white text-md focus:outline-none"
+            placeholder="Write your HTML, CSS, and JavaScript here..."></textarea>
+
+        <div class="flex flex-row p-5">
+            <!-- New input field for specifying the route -->
+            <input type="text" id="route-name" placeholder="Enter Route Name (e.g., route1)"
+                class="input input-bordered w-6/12 mx-auto my-5 block">
+
+            <button id="deploy-btn" class="btn btn-success w-6/12 mx-auto block">Deploy to sandbox</button>
+        </div>
+
+        <!-- Success message container -->
+        <div id="success-message" class="text-center text-blue-600 mt-4 hidden">
+            Successfully deployed! Please visit the site to check: <a href="#" id="deployment-link" target="_blank"
+                class="text-blue-800 underline"></a>
+        </div>
     </div>
 
-    <div id="minimized-editor">Show Editor</div>
+    <div id="minimized-editor"
+        class="fixed bottom-10 right-10 bg-blue-600 text-white px-4 py-2 cursor-pointer rounded-full">
+        Show Editor
+    </div>
 
     <script>
         const codeArea = document.getElementById("code");
@@ -129,6 +106,8 @@
         const minimizedEditor = document.getElementById("minimized-editor");
         const fileInput = document.getElementById("file-input");
         const deployBtn = document.getElementById("deploy-btn");
+        const successMessage = document.getElementById("success-message");
+        const deploymentLink = document.getElementById("deployment-link");
 
         codeArea.addEventListener("input", () => {
             updatePreview(codeArea.value);
@@ -214,24 +193,35 @@
 
         // Deploy to Firebase functionality
         deployBtn.addEventListener("click", async () => {
+            const htmlContent = codeArea.value;
+            const routeName = document.getElementById("route-name").value.trim();
+
+            if (!routeName) {
+                alert("Please enter a valid route name.");
+                return;
+            }
+
             try {
                 deployBtn.disabled = true;
                 deployBtn.textContent = "Deploying...";
 
-                // Capture the current code from the editor
-                const htmlContent = codeArea.value;
-
-                // Make a request to the backend server to deploy with HTML content
-                const response = await fetch('https://57b3-54-253-36-203.ngrok-free.app/deploy', {
+                // Make a request to the backend server to deploy with HTML content and route name
+                const response = await fetch('https://54.253.36.203:3001/deploy', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ htmlContent })
+                    body: JSON.stringify({ htmlContent, routeName })
                 });
 
                 if (response.ok) {
                     alert("Deployment successful!");
+
+                    // Display the success message and set the link
+                    successMessage.classList.remove("hidden");
+                    const deploymentURL = `https://flyer-bot-b19f1.web.app/${routeName}`;
+                    deploymentLink.href = deploymentURL;
+                    deploymentLink.textContent = deploymentURL;
                 } else {
                     alert("Deployment failed. Please try again.");
                 }
@@ -240,10 +230,9 @@
                 alert("An error occurred during deployment. Please check console for details.");
             } finally {
                 deployBtn.disabled = false;
-                deployBtn.textContent = "Deploy to Firebase";
+                deployBtn.textContent = "Deploy to sandbox";
             }
         });
-
     </script>
 </body>
 
