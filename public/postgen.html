@@ -320,29 +320,10 @@
                 "https://images.unsplash.com/photo-1514064019862-23e2a332a6a6?q=80&w=2028&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
             ],
             christmas: [
-                "https://images.unsplash.com/photo-1480422080719-4d25a4c7e22c?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                "https://plus.unsplash.com/premium_photo-1698530721644-e158a624ecf2?q=80&w=2018&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                "https://images.unsplash.com/photo-1512389142860-9c449e58a543?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-            ],
-            defaultSpring: [
-                "https://images.pexels.com/photos/712786/pexels-photo-712786.jpeg",
-                "https://images.pexels.com/photos/414612/pexels-photo-414612.jpeg",
-                "https://images.pexels.com/photos/34950/pexels-photo.jpg"
-            ],
-            defaultSummer: [
-                "https://images.pexels.com/photos/457882/pexels-photo-457882.jpeg",
-                "https://images.pexels.com/photos/248616/pexels-photo-248616.jpeg",
-                "https://images.pexels.com/photos/457944/pexels-photo-457944.jpeg"
-            ],
-            defaultAutumn: [
-                "https://images.pexels.com/photos/1338695/pexels-photo-1338695.jpeg",
-                "https://images.pexels.com/photos/33109/fall-autumn-red-season.jpg",
-                "https://images.pexels.com/photos/235721/pexels-photo-235721.jpeg"
-            ],
-            defaultWinter: [
-                "https://images.unsplash.com/photo-1480497490787-505ec076689f?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                "https://plus.unsplash.com/premium_photo-1675714692733-bc27da8f6f0e?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                "https://images.unsplash.com/photo-1473654729523-203e25dfda10?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                "./images/xmas-hive.jpeg",
+                "./images/xmas-hive-2.jpeg",
+                "./images/xmas-hive-3.jpg",
+                "./images/xmas-hive-4.jpg",
             ]
         };
 
@@ -371,22 +352,17 @@
 
             // Holiday checks
             if (month === 1 && day === 1) return "newYear";
-            if (month === 1 && day >= 15 && day <= 21 && date.getDay() === 1) return "martinLutherKingJrDay"; // 3rd Monday of January
+            if (month === 1 && day >= 15 && day <= 21) return "martinLutherKingJrDay"; // 3rd Monday of January
             if (month === 2 && day === 14) return "valentinesDay";
-            if (month === 2 && day >= 15 && day <= 21 && date.getDay() === 1) return "presidentsDay"; // 3rd Monday of February
-            if (month === 4 && day >= 1 && day <= 30 && date.getDay() === 0) return "easter"; // Placeholder for Easter Sunday
-            if (month === 5 && day >= 25 && day <= 31 && date.getDay() === 1) return "memorialDay"; // Last Monday of May
+            if (month === 2 && day >= 15 && day <= 21) return "presidentsDay"; // 3rd Monday of February
+            if (month === 4 && day >= 1 && day <= 30) return "easter"; // Placeholder for Easter Sunday
+            if (month === 5 && day >= 25 && day <= 31) return "memorialDay"; // Last Monday of May
             if (month === 7 && day === 4) return "independenceDay";
-            if (month === 9 && day >= 1 && day <= 7 && date.getDay() === 1) return "laborDay"; // 1st Monday of September
+            if (month === 9 && day >= 1 && day <= 7) return "laborDay"; // 1st Monday of September
             if (month === 10 && day >= 20 && day <= 31) return "halloween";
-            if (month === 11 && day >= 22 && day <= 28 && date.getDay() === 4) return "thanksgiving"; // 4th Thursday of November
+            if (month === 11 && day >= 22 && day <= 25) return "halloween"; // 4th Thursday of November
+            if (month === 11 && day >= 25 && day <= 31) return "christmas";
             if (month === 12 && day >= 1 && day <= 25) return "christmas";
-
-            // Default to seasons
-            if (month >= 3 && month <= 5) return "defaultSpring";
-            if (month >= 6 && month <= 8) return "defaultSummer";
-            if (month >= 9 && month <= 11) return "defaultAutumn";
-            return "defaultWinter";
         }
 
         // Call the function to set the background on page load
