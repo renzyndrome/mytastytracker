@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TM Consolidated Proj</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        function updateTime() {
+            const arizonaTime = new Date().toLocaleString("en-US", {
+                timeZone: "America/Phoenix",
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: true
+            });
+
+            document.getElementById('arizona-time').innerText = arizonaTime;
+        }
+
+        setInterval(updateTime, 1000); // Update every second
+    </script>
+</head>
+<body class="bg-gray-100 text-blue-900 flex flex-col min-h-screen">
+    <!-- Header Section -->
+    <header class="bg-blue-600 text-white py-6">
+        <div class="container mx-auto text-center">
+            <h1 class="text-3xl font-bold">Tasty Management</h1>
+            <p class="mt-2">Consolidated Projects</p>
+
+            <!-- US Arizona Time -->
+            <div class="flex justify-center items-center gap-2 mt-4">
+                <!-- US Time with Flag -->
+                <h3 class="text-sm font-bold flex items-center gap-2">
+                    <img src="https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_States.svg" 
+                         alt="US Flag" 
+                         class="w-6 h-6">
+                    US Arizona Time
+                </h3>
+                <p id="arizona-time" class="text-sm text-gray-200"></p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Section -->
+    <main class="container mx-auto py-10 px-4 flex-grow">
+        <!-- Section 1 -->
+        <section class="mb-10">
+            <h2 class="text-2xl font-semibold mb-6 text-blue-600">Sites & Servers</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Card 1 -->
+                <a href="https://www.mytastytracker.com/" target="_blank" class="bg-white shadow-md rounded-lg p-6 transform hover:scale-105 transition">
+                    <h2 class="text-xl font-semibold mb-2 text-blue-900">MyTastyTracker</h2>
+                    <p class="text-blue-900">Tasty Management Job Monitoring</p>
+                </a>
+                <!-- Card 2 -->
+                <a href="https://www.allthiscash.com/" target="_blank" class="bg-white shadow-md rounded-lg p-6 transform hover:scale-105 transition">
+                    <h2 class="text-xl font-semibold mb-2 text-blue-900">AllThisCash</h2>
+                    <p class="text-blue-900">Post Processing and Monitoring</p>
+                </a>
+                <!-- Card 4 -->
+                <a href="https://www.mytastytracker.com/sandbox" target="_blank" class="bg-white shadow-md rounded-lg p-6 transform hover:scale-105 transition">
+                    <h2 class="text-xl font-semibold mb-2 text-blue-900">Sandbox</h2>
+                    <p class="text-blue-900">Brief description for the link.</p>
+                </a>
+            </div>
+        </section>
+
+        <!-- Section 2 -->
+        <section class="mb-10">
+            <h2 class="text-2xl font-semibold mb-6 text-blue-600">Apps & Extensions</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+                <!-- Card 5 -->
+                <a href="https://drive.google.com/drive/folders/1Vtfn0bFMRn0z1KMmypAfIo2jSYBUEOtz" target="_blank" class="bg-white shadow-md rounded-lg p-6 transform hover:scale-105 transition">
+                    <h2 class="text-xl font-semibold mb-2 text-blue-900">Vault Downloader</h2>
+                    <p class="text-blue-900">Model's video downloader.</p>
+                </a>
+                <!-- Card 6 -->
+                <a href="https://drive.google.com/drive/folders/1Vtfn0bFMRn0z1KMmypAfIo2jSYBUEOtz" target="_blank" class="bg-white shadow-md rounded-lg p-6 transform hover:scale-105 transition">
+                    <h2 class="text-xl font-semibold mb-2 text-blue-900">CB Extension</h2>
+                    <p class="text-blue-900">Chrome Extension for CB live monitoring</p>
+                </a>
+                <!-- Card 7 -->
+            </div>
+        </section>
+
+        <!-- Section 3 -->
+        <section>
+            <h2 class="text-2xl font-semibold mb-6 text-blue-600">Dashboards</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <!-- Card 8 -->
+                <a href="https://lookerstudio.google.com/reporting/c3f821e1-7ccc-4f5b-a476-55cdfc626ca9/page/SouDE" target="_blank" class="bg-white shadow-md rounded-lg p-6 transform hover:scale-105 transition">
+                    <h2 class="text-xl font-semibold mb-2 text-blue-900">Whale Tipper Dashboard</h2>
+                    <p class="text-blue-900">Top Tippers and Latest Hour Transactions.</p>
+                </a>
+                <!-- Card 9 -->
+                <a href="https://lookerstudio.google.com/reporting/17fb4b38-4304-4a58-b1ac-9a4f6591d8ff/page/p_dtb16bh3id" target="_blank" class="bg-white shadow-md rounded-lg p-6 transform hover:scale-105 transition">
+                    <h2 class="text-xl font-semibold mb-2 text-blue-900">Chatter Summary Dashboard</h2>
+                    <p class="text-blue-900">Chatter performance, sales and Accounting</p>
+                </a>
+                <!-- Card 9 -->
+                <a href="https://lookerstudio.google.com/reporting/7f1b52c2-14a8-446c-bb98-826ef79614fc/page/mDEFE" target="_blank" class="bg-white shadow-md rounded-lg p-6 transform hover:scale-105 transition">
+                    <h2 class="text-xl font-semibold mb-2 text-blue-900">The Show</h2>
+                    <p class="text-blue-900">Total Live Shows per day</p>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="bg-gray-800 text-white py-4">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2024 Tasty Management. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -26,6 +26,10 @@
       {
         "source": "/sandbox",
         "destination": "/sandbox.html"
+      },
+      {
+        "source": "/projects",
+        "destination": "/projects.html"
       }
     ]
   }
