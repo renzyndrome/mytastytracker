@@ -162,7 +162,7 @@
             document.getElementById('clock').textContent = formatTime12hr(pst) + " PST";
 
             // Offset time to midnight -> 5pm
-            time.setHours(time.getHours() - 17);
+            time.setHours(time.getHours() - 16);
 
             const offset = time.getDay() + 1;
 
@@ -306,7 +306,7 @@
             ],
             independenceDay: [
                 "https://images.pexels.com/photos/4669118/pexels-photo-4669118.jpeg",
-                "https://images.pexe    ls.com/photos/4669119/pexels-photo-4669119.jpeg",
+                "https://images.pexels.com/photos/4669119/pexels-photo-4669119.jpeg",
                 "https://images.pexels.com/photos/4669120/pexels-photo-4669120.jpeg"
             ],
             halloween: [
@@ -323,9 +323,48 @@
                 "./images/xmas-hive.jpeg",
                 "./images/xmas-hive-2.jpeg",
                 "./images/xmas-hive-3.jpg",
-                "./images/xmas-hive-4.jpg",
+                "./images/xmas-hive-4.jpg"
+            ],
+            winter: [
+                './images/winter/winter-hive-1.png',
+                './images/winter/winter-hive-2.png',
+                './images/winter/winter-hive-3.png',
+                './images/winter/winter-hive-4.png',
+                './images/winter/winter-hive-5.png',
+                './images/winter/winter-hive-6.png'
             ]
         };
+
+        function getHolidayOrSeason(date) {
+            const month = date.getMonth() + 1; // JavaScript months are 0-based
+            const day = date.getDate();
+
+            // Check for Christmas (December 1-27)
+            if (month === 12 && day >= 1 && day <= 27) {
+                return 'christmas';
+            }
+            
+            // Check for Winter (December 28 - February 10)
+            if ((month === 12 && day >= 28) || 
+                (month === 1) || 
+                (month === 2 && day <= 10)) {
+                return 'winter';
+            }
+
+            // Check for New Year (December 31 - January 1)
+            if ((month === 12 && day === 31) || (month === 1 && day === 1)) {
+                return 'newYear';
+            }
+
+            // Check for other holidays
+            if (month === 2 && day === 14) return "valentinesDay";
+            if (month === 4 && day >= 1 && day <= 30) return "easter";
+            if (month === 7 && day === 4) return "independenceDay";
+            if (month === 10 && day >= 20 && day <= 31) return "halloween";
+            if (month === 11 && day >= 22 && day <= 28) return "thanksgiving";
+
+            return null;
+        }
 
         function setHolidayOrSeasonBackground() {
             const currentDate = new Date();
@@ -343,26 +382,6 @@
             } else {
                 console.error("Background not found for theme:", currentTheme);
             }
-        }
-
-        // Updated holiday detection logic
-        function getHolidayOrSeason(date) {
-            const month = date.getMonth() + 1; // Months are 0-indexed
-            const day = date.getDate();
-
-            // Holiday checks
-            if (month === 1 && day === 1) return "newYear";
-            if (month === 1 && day >= 15 && day <= 21) return "martinLutherKingJrDay"; // 3rd Monday of January
-            if (month === 2 && day === 14) return "valentinesDay";
-            if (month === 2 && day >= 15 && day <= 21) return "presidentsDay"; // 3rd Monday of February
-            if (month === 4 && day >= 1 && day <= 30) return "easter"; // Placeholder for Easter Sunday
-            if (month === 5 && day >= 25 && day <= 31) return "memorialDay"; // Last Monday of May
-            if (month === 7 && day === 4) return "independenceDay";
-            if (month === 9 && day >= 1 && day <= 7) return "laborDay"; // 1st Monday of September
-            if (month === 10 && day >= 20 && day <= 31) return "halloween";
-            if (month === 11 && day >= 22 && day <= 25) return "halloween"; // 4th Thursday of November
-            if (month === 11 && day >= 25 && day <= 31) return "christmas";
-            if (month === 12 && day >= 1 && day <= 25) return "christmas";
         }
 
         // Call the function to set the background on page load
