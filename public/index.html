@@ -68,6 +68,26 @@
             background-color: #fff;
             border-radius: 4px;
         }
+
+        .utc-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: rgba(51, 51, 51, 0.8);
+            padding: 10px;
+            border-radius: 8px;
+            color: white;
+            z-index: 1000;
+        }
+        .utc-widget a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px !important;
+        }
+        .utc-widget span {
+            font-size: 16px !important;
+            color: white;
+        }
     </style>
 </head>
 
@@ -123,6 +143,14 @@
     </a>
     <button onclick="passwordCheck2()">Model Info</button>
 
+    <div class="utc-widget">
+        <a href="https://time.is/UTC" id="time_is_link" rel="nofollow">Time in UTC:</a>
+        <span id="UTC_za00"></span>
+        <script src="//widget.time.is/en.js"></script>
+        <script>
+            time_is_widget.init({UTC_za00:{template:"TIME<br>DATE", time_format:"12hours:minutes:secondsAMPM", date_format:"monthnum/daynum/yy"}});
+        </script>
+    </div>
 
     <script>
 
@@ -251,7 +279,7 @@
             ],
             independenceDay: [
                 "https://images.pexels.com/photos/4669118/pexels-photo-4669118.jpeg",
-                "https://images.pexe    ls.com/photos/4669119/pexels-photo-4669119.jpeg",
+                "https://images.pexels.com/photos/4669119/pexels-photo-4669119.jpeg",
                 "https://images.pexels.com/photos/4669120/pexels-photo-4669120.jpeg"
             ],
             halloween: [
